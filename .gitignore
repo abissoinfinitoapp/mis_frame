@@ -4,3 +4,6 @@ img-originali/
 brani-completi/
 .claude/
 .agents/
+
+# Documenti privati (EPK ecc.): non pubblicare
+*.pdf

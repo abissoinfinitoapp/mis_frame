@@ -5,12 +5,25 @@
 
 window.ARTISTA = {
   nome: "Mis_Frame",
-  sottotitolo: "Dark Gothic Metal",
-  // BOZZA: da confermare o sostituire con la bio ufficiale
-  bio: "Mis_Frame è il progetto dark gothic metal di una cantante metal, fondatrice di FrameLake. Dopo il debutto con \"A World Without Rules\", il secondo singolo \"New Blood\" è uscito il 7 novembre 2026 per Sf-Music Label.",
+  sottotitolo: "Gothic / Alternative Metal",
+  // Bio (dall'EPK): un paragrafo per riga
+  bio: [
+    "Mis_Frame è un progetto Gothic / Alternative Metal a voce femminile nato a Novara, nell'area di Milano.",
+    "Atmosfere oscure, intensità melodica, chitarre pesanti e una voce espressiva: un'identità metal contemporanea costruita su musica originale e su una forte direzione visiva.",
+    "Su Spotify sono disponibili i singoli originali “A World Without Rules” e “New Blood”; altro materiale originale uscirà progressivamente.",
+    "Il prossimo passo è il palco: la formazione definitiva con band completa è in via di definizione, insieme a una live session professionale di tre brani dedicata a promoter, agenzie di booking, locali e festival."
+  ],
 
   // Foto principale (verticale, riempie lo schermo del telefono)
-  foto: "img/artista.jpg",
+  foto: "img/vera-4.jpg",
+
+  // Carosello di foto sotto l'header (nell'ordine in cui scorrono)
+  galleria: [
+    "img/vera-1.jpg",
+    "img/vera-2.jpg",
+    "img/vera-3.jpg",
+    "img/vera-5.jpg"
+  ],
 
   // Sfondo tenue di tutta la pagina, sotto la foto principale
   sfondoPagina: "img/cover-framelake.jpg",
@@ -41,7 +54,6 @@ window.ARTISTA = {
       anno: "2026",
       data: "7 novembre 2026",
       copertina: "img/cover-new-blood.jpg",
-      video: "img/new-blood.mp4",
       estratto: "estratti/new-blood.mp3",
       link: "https://open.spotify.com/album/3BozLhrZmMiO6qIw8hoNrM"
     },
@@ -73,5 +85,5 @@ window.ARTISTA = {
     { nome: "Facebook",  url: "" }
   ],
 
-  contatti: "missframeartist@gmail.com"   // booking (dalla bio Instagram)
+  contatti: "missframeartist@gmail.com"   // booking
 };

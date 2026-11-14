@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=10" />
 </head>
 <body class="home">
 
@@ -22,6 +22,15 @@
   </header>
 
   <main class="contenuto">
+
+    <section id="galleriaBox" class="blocco galleria hidden" aria-label="Foto">
+      <div class="carosello-cornice">
+        <div id="carosello" class="carosello"></div>
+        <button class="freccia freccia-sx" aria-label="Foto precedente">‹</button>
+        <button class="freccia freccia-dx" aria-label="Foto successiva">›</button>
+      </div>
+      <div id="punti" class="punti"></div>
+    </section>
 
     <section id="ultimaBox" class="blocco in-evidenza hidden"></section>
     <section id="prossimaBox" class="blocco in-evidenza hidden"></section>
@@ -40,7 +49,7 @@
     </template>
 
     <section class="blocco">
-      <p id="bio" class="bio"></p>
+      <div id="bio" class="bio"></div>
     </section>
 
     <section id="discoBox" class="blocco">
@@ -65,7 +74,7 @@
 
   </main>
 
-  <script src="artist.js?v=8"></script>
+  <script src="artist.js?v=9"></script>
   <script>
     const a = window.ARTISTA || {};
     const $ = (id) => document.getElementById(id);
@@ -73,7 +82,11 @@
     document.title = a.nome || "Artista";
     $("nome").textContent = a.nome || "";
     $("sottotitolo").textContent = a.sottotitolo || "";
-    $("bio").textContent = a.bio || "";
+    for (const par of [].concat(a.bio || [])) {
+      const p = document.createElement("p");
+      p.textContent = par;
+      $("bio").appendChild(p);
+    }
 
     const foto = $("heroFoto");
     if (a.foto) {
@@ -87,6 +100,47 @@
     if (a.sfondoPagina) {
       document.body.style.setProperty("--sfondo-pagina", `url("${a.sfondoPagina}")`);
     }
+
+    // ---------- Carosello foto ----------
+    (function () {
+      const foto = (a.galleria || []).filter(Boolean);
+      if (!foto.length) { $("galleriaBox").remove(); return; }
+      $("galleriaBox").classList.remove("hidden");
+      const car = $("carosello"), punti = $("punti");
+      foto.forEach((src, i) => {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = (a.nome || "") + " – foto " + (i + 1);
+        if (i > 0) img.loading = "lazy";
+        // Le foto quadrate/orizzontali si vedono intere, le verticali riempiono la cornice
+        img.onload = () => img.classList.toggle("intera", img.naturalWidth / img.naturalHeight > 0.85);
+        car.appendChild(img);
+        const p = document.createElement("button");
+        p.setAttribute("aria-label", "Foto " + (i + 1));
+        p.addEventListener("click", () => { vai(i); ferma(); });
+        punti.appendChild(p);
+      });
+      const n = foto.length;
+      let corrente = 0;
+      const vai = (i) => car.scrollTo({ left: ((i + n) % n) * car.clientWidth, behavior: "smooth" });
+      const aggiorna = () => {
+        corrente = Math.round(car.scrollLeft / car.clientWidth);
+        [...punti.children].forEach((p, i) => p.classList.toggle("attivo", i === corrente));
+      };
+      car.addEventListener("scroll", aggiorna, { passive: true });
+      aggiorna();
+      $("galleriaBox").querySelector(".freccia-sx").onclick = () => { vai(corrente - 1); ferma(); };
+      $("galleriaBox").querySelector(".freccia-dx").onclick = () => { vai(corrente + 1); ferma(); };
+
+      // Scorre da solo finché non lo tocchi
+      let timer = null;
+      const ferma = () => { clearInterval(timer); timer = null; };
+      car.addEventListener("pointerdown", ferma);
+      car.addEventListener("touchstart", ferma, { passive: true });
+      if (n > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        timer = setInterval(() => { if (!document.hidden) vai(corrente + 1); }, 4500);
+      }
+    })();
 
     // ---------- Lettore estratti: un solo brano alla volta ----------
     const lettore = new Audio();
