@@ -363,6 +363,10 @@ audio { width: 100%; margin-top: 12px; }
   text-transform: uppercase;
   margin-bottom: .3em !important;
 }
+/* etichetta in mezzo a una strofa (testo senza righe vuote): stacca dalla parte prima */
+.strofa .etichetta:not(:first-child) {
+  margin-top: 1.4em !important;
+}
 
 @media (min-width: 720px) {
   .link-lista { grid-template-columns: repeat(2, 1fr); }

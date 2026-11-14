@@ -38,4 +38,12 @@ window.BRANI = [
     testo: "testi/i living here.txt"
   },
 
+  {
+    id: "insane",
+    titolo: "Insane",
+    guida: "audio/insane guida.mp3",
+    base:  "audio/insane base.mp3",
+    testo: "testi/Insane.txt"
+  },
+
 ];
