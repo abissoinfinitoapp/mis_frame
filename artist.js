@@ -35,7 +35,7 @@ window.ARTISTA = {
   // Numeri in evidenza (dall'EPK): aggiornali quando crescono
   numeri: [
     { valore: "5K+",  titolo: { it: "Visualizzazioni Instagram", en: "Instagram views" },     nota: { it: "nel primo mese", en: "in the first month" } },
-    { valore: "420+", titolo: { it: "Follower Instagram",        en: "Instagram followers" }, nota: { it: "e in crescita", en: "and growing" } },
+    { valore: "500+", titolo: { it: "Follower Instagram",        en: "Instagram followers" }, nota: { it: "e in crescita", en: "and growing" } },
     { valore: "2",    titolo: { it: "Singoli originali",         en: "Original singles" },    nota: { it: "disponibili su Spotify", en: "available on Spotify" } }
   ],
 
@@ -45,14 +45,14 @@ window.ARTISTA = {
       "Mis_Frame è un progetto Gothic / Alternative Metal emergente a voce femminile, con base a Novara, nel Nord Italia, nell'area di Milano.",
       "Il progetto unisce atmosfere oscure, intensità melodica, chitarre pesanti e una voce femminile espressiva, dando forma a un'identità metal contemporanea costruita su musica originale e su una forte direzione visiva.",
       "Su Spotify sono disponibili due singoli originali: “A World Without Rules” e “New Blood”. Altro materiale originale uscirà progressivamente, ampliando il catalogo e il racconto artistico del progetto.",
-      "Dal recente lancio, Mis_Frame ha iniziato a costruire un pubblico organico attraverso i social, superando le 5.000 visualizzazioni su Instagram nel primo mese e i 420 follower, in costante crescita.",
+      "Dal recente lancio, Mis_Frame ha iniziato a costruire un pubblico organico attraverso i social, superando le 5.000 visualizzazioni su Instagram nel primo mese e i 500 follower, in costante crescita.",
       "Il prossimo passo è il palco. La formazione definitiva con band completa è in via di completamento, insieme a una live session professionale di tre brani pensata per promoter, agenzie di booking, locali e organizzatori di festival."
     ],
     en: [
       "Mis_Frame is an emerging female-fronted Gothic / Alternative Metal project based in Novara, Northern Italy, within the Milan area.",
       "The project combines dark atmospheres, melodic intensity, heavy guitars and expressive female vocals, shaping a contemporary metal identity built around original music and a strong visual direction.",
       "Two original singles are currently available on Spotify: “A World Without Rules” and “New Blood”. Further original material will be released progressively, expanding the project catalogue and its artistic narrative.",
-      "Since its recent launch, Mis_Frame has begun building an organic audience through social media, reaching more than 5,000 Instagram views in the first month and over 420 followers, with continued growth.",
+      "Since its recent launch, Mis_Frame has begun building an organic audience through social media, reaching more than 5,000 Instagram views in the first month and over 500 followers, with continued growth.",
       "The next step is the live stage. The definitive full-band line-up is currently being completed, together with a professional three-song live session created for promoters, booking agencies, venues and festival organizers."
     ]
   },
