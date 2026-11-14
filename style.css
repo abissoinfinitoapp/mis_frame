@@ -453,3 +453,16 @@ audio { width: 100%; margin-top: 12px; }
   white-space: nowrap;
 }
 .hero .eyebrow { margin-bottom: 24px; }
+
+/* Desktop: la foto dell'header si vede intera, ai lati la stessa foto sfocata */
+@media (min-width: 700px) {
+  .hero { min-height: 92vh; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background: var(--hero-sfondo, none) center / cover no-repeat;
+    filter: blur(28px) brightness(.55) saturate(.9);
+  }
+  .hero-foto { object-fit: contain; object-position: center top; }
+}
