@@ -452,7 +452,7 @@ audio { width: 100%; margin-top: 12px; }
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
-.hero .eyebrow { margin-bottom: 24px; }
+.hero .eyebrow { margin-bottom: 10px; }
 
 /* Desktop: la foto dell'header si vede intera, ai lati la stessa foto sfocata */
 @media (min-width: 700px) {
@@ -465,4 +465,103 @@ audio { width: 100%; margin-top: 12px; }
     filter: blur(28px) brightness(.55) saturate(.9);
   }
   .hero-foto { object-fit: contain; object-position: center top; }
+}
+
+/* ---------- Struttura EPK ---------- */
+
+/* Selettore lingua */
+.lingua {
+  display: inline-flex;
+  margin-top: 22px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  background: rgba(10, 9, 11, .55);
+  overflow: hidden;
+}
+.hero-testo .lingua { display: flex; width: max-content; margin-left: auto; margin-right: auto; }
+.lingua a {
+  min-width: 44px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0 12px;
+  font-family: var(--inciso);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-decoration: none;
+  color: var(--tenue);
+}
+.lingua a[aria-current] { background: var(--sangue); color: #fff; }
+
+/* Header */
+.luogo { margin: 0 0 14px; color: var(--tenue); font-size: 14px; letter-spacing: .04em; }
+.motto {
+  margin: 0 0 26px;
+  font-family: var(--inciso);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px #000;
+}
+
+/* Numeri */
+.numeri { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; }
+.numero { display: flex; flex-direction: column; gap: 4px; }
+.numero strong {
+  font-family: var(--inciso);
+  font-size: clamp(28px, 9vw, 40px);
+  line-height: 1.1;
+  color: var(--testo);
+  text-shadow: 0 0 24px rgba(226, 68, 92, .35);
+}
+.numero-titolo { color: var(--accento); font-size: 12px; font-weight: 600; line-height: 1.3; }
+.numero .nota { font-size: 12px; line-height: 1.3; }
+
+/* Titoli grandi (About, Ready for the next stage) */
+.titolo-grande {
+  font-size: clamp(30px, 9vw, 44px);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.titolo-grande .accento, .accento { color: var(--accento); }
+.eyebrow.centrata { text-align: center; margin-bottom: 20px; letter-spacing: .3em; }
+
+/* Schede */
+.scheda {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--bordo);
+  border-radius: 14px;
+  background: rgba(20, 17, 20, .85);
+}
+.scheda h3 {
+  margin: 0 0 8px;
+  font-family: var(--inciso);
+  font-size: 16px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accento);
+}
+.scheda p { margin: 0; color: var(--tenue); font-size: 15px; }
+.scheda-etichetta {
+  margin: 0 0 10px !important;
+  color: var(--accento) !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.generi-lista { color: var(--testo) !important; font-weight: 600; font-size: 15px !important; white-space: pre-wrap; }
+.schede { display: grid; gap: 0 14px; }
+.live-testo { font-size: 17px; opacity: .9; margin: 16px 0 8px; }
+
+.info-live { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin: 0; }
+.info-live dt { color: var(--tenue); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.info-live dd { margin: 2px 0 0; font-weight: 600; }
+
+@media (min-width: 600px) {
+  .schede { grid-template-columns: 1fr 1fr; }
 }

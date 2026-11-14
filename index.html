@@ -4,30 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0a090b" />
-  <title>Artista</title>
+  <title>Mis_Frame</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=13" />
+  <link rel="stylesheet" href="style.css?v=15" />
 </head>
 <body class="home">
 
   <header class="hero">
     <img id="heroFoto" class="hero-foto" alt="" />
     <div class="hero-testo">
-      <p id="sottotitolo" class="eyebrow"></p>
       <h1 id="nome" class="solo-lettori"></h1>
-      <a id="heroBtn" class="btn btn-primario" href="#evidenza">Ascolta</a>
+      <p id="sottotitolo" class="eyebrow"></p>
+      <p id="luogo" class="luogo"></p>
+      <p id="motto" class="motto"></p>
+      <a id="heroBtn" class="btn btn-primario" href="#prossimaBox"></a>
+      <nav class="lingua" aria-label="Lingua / Language">
+        <a href="?lang=it" data-l="it" hreflang="it">IT</a>
+        <a href="?lang=en" data-l="en" hreflang="en">EN</a>
+      </nav>
     </div>
   </header>
 
   <main class="contenuto">
 
-    <section id="galleriaBox" class="blocco galleria hidden" aria-label="Foto">
+    <section id="numeriBox" class="blocco">
+      <div id="numeri" class="numeri"></div>
+    </section>
+
+    <section id="galleriaBox" class="blocco galleria hidden">
       <div class="carosello-cornice">
         <div id="carosello" class="carosello"></div>
-        <button class="freccia freccia-sx" aria-label="Foto precedente">‹</button>
-        <button class="freccia freccia-dx" aria-label="Foto successiva">›</button>
+        <button class="freccia freccia-sx" data-t="fotoPrec" data-t-attr="aria-label">‹</button>
+        <button class="freccia freccia-dx" data-t="fotoSucc" data-t-attr="aria-label">›</button>
       </div>
       <div id="punti" class="punti"></div>
     </section>
@@ -48,45 +58,111 @@
       <a class="btn btn-primario ev-link" target="_blank" rel="noopener"></a>
     </template>
 
-    <section class="blocco">
+    <section id="aboutBox" class="blocco">
+      <h2 class="titolo-grande">About</h2>
+      <p class="eyebrow centrata" data-nome></p>
       <div id="bio" class="bio"></div>
+      <div id="generiBox" class="scheda generi">
+        <p class="scheda-etichetta" data-t="generi"></p>
+        <p id="generi" class="generi-lista"></p>
+      </div>
     </section>
 
     <section id="discoBox" class="blocco">
-      <h2 class="sezione">Discografia</h2>
+      <h2 class="sezione" data-t="disco"></h2>
       <div id="discoList" class="disco"></div>
     </section>
 
+    <section id="liveBox" class="blocco">
+      <h2 class="titolo-grande"><span data-t="live1"></span><br /><span class="accento" data-t="live2"></span></h2>
+      <p id="liveTesto" class="live-testo"></p>
+      <div id="liveSchede" class="schede"></div>
+      <div id="liveInfoBox" class="scheda">
+        <p class="scheda-etichetta" data-t="liveInfo"></p>
+        <dl id="liveInfo" class="info-live"></dl>
+      </div>
+    </section>
+
     <section id="storeBox" class="blocco">
-      <h2 class="sezione">Ascolta su</h2>
+      <h2 class="sezione" data-t="store"></h2>
       <div id="storeList" class="link-lista"></div>
     </section>
 
     <section id="socialBox" class="blocco">
-      <h2 class="sezione">Segui</h2>
+      <h2 class="sezione" data-t="social"></h2>
       <div id="socialList" class="link-lista compatta"></div>
     </section>
 
+    <section id="bookingBox" class="blocco booking">
+      <h2 class="sezione" data-t="booking"></h2>
+      <div id="bookingList" class="link-lista"></div>
+    </section>
+
     <footer class="piede">
-      <p id="contatti"></p>
       <p id="copy"></p>
     </footer>
 
   </main>
 
-  <script src="artist.js?v=9"></script>
+  <script src="artist.js?v=10"></script>
   <script>
     const a = window.ARTISTA || {};
     const $ = (id) => document.getElementById(id);
 
+    // ---------- Lingua: ?lang=… nell'indirizzo, poi la scelta salvata, poi la lingua del telefono ----------
+    const LINGUE = ["it", "en"];
+    let lingua = new URLSearchParams(location.search).get("lang");
+    if (LINGUE.includes(lingua)) {
+      try { localStorage.setItem("lingua", lingua); } catch (e) {}
+    } else {
+      try { lingua = localStorage.getItem("lingua"); } catch (e) { lingua = null; }
+      if (!LINGUE.includes(lingua)) lingua = /^it\b/i.test(navigator.language || "") ? "it" : "en";
+    }
+    document.documentElement.lang = lingua;
+    document.querySelectorAll(".lingua a").forEach((l) => {
+      if (l.dataset.l === lingua) l.setAttribute("aria-current", "true");
+    });
+
+    const UI = {
+      it: {
+        ascoltaAnteprima: "Ascolta l'anteprima", ascolta: "Ascolta",
+        ultima: "Ultima uscita", prossima: "Prossima uscita",
+        inUscita: "in uscita il ", inArrivo: "in arrivo",
+        completo: "Ascolta il brano completo", completoBreve: "Ascolta completo",
+        estrattoDi: "Ascolta un estratto di ", anteprimaDi: "Ascolta l'anteprima di ",
+        generi: "Genere e influenze", disco: "Discografia",
+        live1: "Pronti per", live2: "il prossimo palco", liveInfo: "Informazioni live",
+        store: "Ascolta su", social: "Segui", booking: "Booking e concerti",
+        foto: "foto", fotoPrec: "Foto precedente", fotoSucc: "Foto successiva"
+      },
+      en: {
+        ascoltaAnteprima: "Listen to the preview", ascolta: "Listen",
+        ultima: "Latest release", prossima: "Coming next",
+        inUscita: "out on ", inArrivo: "coming soon",
+        completo: "Listen to the full track", completoBreve: "Full track",
+        estrattoDi: "Play an excerpt of ", anteprimaDi: "Play the preview of ",
+        generi: "Genre & influences", disco: "Discography",
+        live1: "Ready for", live2: "the next stage", liveInfo: "Live information",
+        store: "Listen on", social: "Follow", booking: "Booking & live",
+        foto: "photo", fotoPrec: "Previous photo", fotoSucc: "Next photo"
+      }
+    }[lingua];
+
+    // Testo nella lingua scelta: accetta "testo" oppure { it: "…", en: "…" }
+    const t = (v) => (v && typeof v === "object" && !Array.isArray(v)) ? (v[lingua] ?? v.it ?? "") : (v ?? "");
+
+    document.querySelectorAll("[data-t]").forEach((el) => {
+      const s = UI[el.dataset.t];
+      if (el.dataset.tAttr) el.setAttribute(el.dataset.tAttr, s); else el.textContent = s;
+    });
+    document.querySelectorAll("[data-nome]").forEach((el) => el.textContent = a.nome || "");
+
+    // ---------- Header ----------
     document.title = a.nome || "Artista";
     $("nome").textContent = a.nome || "";
-    $("sottotitolo").textContent = a.sottotitolo || "";
-    for (const par of [].concat(a.bio || [])) {
-      const p = document.createElement("p");
-      p.textContent = par;
-      $("bio").appendChild(p);
-    }
+    $("sottotitolo").textContent = t(a.sottotitolo);
+    $("luogo").textContent = t(a.luogo);
+    $("motto").textContent = t(a.motto);
 
     const foto = $("heroFoto");
     if (a.foto) {
@@ -97,31 +173,43 @@
     } else {
       foto.remove();
     }
-
     if (a.sfondoPagina) {
       document.body.style.setProperty("--sfondo-pagina", `url("${a.sfondoPagina}")`);
     }
 
+    // ---------- Numeri ----------
+    const numeri = (a.numeri || []).filter((n) => n.valore);
+    if (!numeri.length) $("numeriBox").remove();
+    for (const n of numeri) {
+      const el = document.createElement("div");
+      el.className = "numero";
+      el.innerHTML = `<strong></strong><span class="numero-titolo"></span><span class="nota"></span>`;
+      el.children[0].textContent = n.valore;
+      el.children[1].textContent = t(n.titolo);
+      el.children[2].textContent = t(n.nota);
+      $("numeri").appendChild(el);
+    }
+
     // ---------- Carosello foto ----------
     (function () {
-      const foto = (a.galleria || []).filter(Boolean);
-      if (!foto.length) { $("galleriaBox").remove(); return; }
+      const fotoG = (a.galleria || []).filter(Boolean);
+      if (!fotoG.length) { $("galleriaBox").remove(); return; }
       $("galleriaBox").classList.remove("hidden");
       const car = $("carosello"), punti = $("punti");
-      foto.forEach((src, i) => {
+      fotoG.forEach((src, i) => {
         const img = document.createElement("img");
         img.src = src;
-        img.alt = (a.nome || "") + " – foto " + (i + 1);
+        img.alt = (a.nome || "") + " – " + UI.foto + " " + (i + 1);
         if (i > 0) img.loading = "lazy";
         // Le foto quadrate/orizzontali si vedono intere, le verticali riempiono la cornice
         img.onload = () => img.classList.toggle("intera", img.naturalWidth / img.naturalHeight > 0.85);
         car.appendChild(img);
         const p = document.createElement("button");
-        p.setAttribute("aria-label", "Foto " + (i + 1));
+        p.setAttribute("aria-label", UI.foto + " " + (i + 1));
         p.addEventListener("click", () => { vai(i); ferma(); });
         punti.appendChild(p);
       });
-      const n = foto.length;
+      const n = fotoG.length;
       let corrente = 0;
       const vai = (i) => car.scrollTo({ left: ((i + n) % n) * car.clientWidth, behavior: "smooth" });
       const aggiorna = () => {
@@ -146,7 +234,7 @@
     // ---------- Lettore estratti: un solo brano alla volta ----------
     const lettore = new Audio();
     lettore.preload = "none";
-    let attivo = null; // { btn, barra, durata }
+    let attivo = null; // { box, btn, barra, durata }
 
     function fmt(s) {
       if (!isFinite(s)) return "";
@@ -189,17 +277,16 @@
       if (attivo.durata) attivo.durata.textContent = fmt(lettore.duration - lettore.currentTime);
     });
 
-    // ---------- In evidenza: prossima uscita, altrimenti l'ultima ----------
+    // ---------- Ultima e prossima uscita ----------
     const uscite = (a.uscite || []).filter((u) => u.titolo);
     const prossima = a.prossima && a.prossima.titolo ? a.prossima : null;
-    // Sotto l'header: ultima uscita (con il video), poi la prossima con l'anteprima
     if (uscite[0]) mostraEvidenza($("ultimaBox"), uscite[0], false);
     if (prossima) mostraEvidenza($("prossimaBox"), prossima, true);
 
     const primo = prossima && prossima.anteprima ? "prossimaBox" : (uscite[0] ? "ultimaBox" : null);
     if (primo) {
       $("heroBtn").href = "#" + primo;
-      $("heroBtn").textContent = primo === "prossimaBox" ? "Ascolta l'anteprima" : "Ascolta";
+      $("heroBtn").textContent = primo === "prossimaBox" ? UI.ascoltaAnteprima : UI.ascolta;
     } else {
       $("heroBtn").remove();
     }
@@ -208,11 +295,11 @@
       box.appendChild($("tplEvidenza").content.cloneNode(true));
       const q = (s) => box.querySelector(s);
       box.classList.remove("hidden");
-      q(".ev-etichetta").textContent = prossima ? "Prossima uscita" : "Ultima uscita";
+      q(".ev-etichetta").textContent = prossima ? UI.prossima : UI.ultima;
       q(".ev-titolo").textContent = ev.titolo;
       q(".ev-info").textContent = prossima
-        ? [ev.tipo, ev.data ? "in uscita il " + ev.data : "in arrivo"].filter(Boolean).join(" · ")
-        : [ev.tipo, ev.data || ev.anno].filter(Boolean).join(" · ");
+        ? [t(ev.tipo), ev.data ? UI.inUscita + t(ev.data) : UI.inArrivo].filter(Boolean).join(" · ")
+        : [t(ev.tipo), t(ev.data) || ev.anno].filter(Boolean).join(" · ");
 
       const media = q(".evidenza-media");
       const img = document.createElement("img");
@@ -236,18 +323,27 @@
         const pl = q(".player-estratto");
         pl.classList.remove("hidden");
         pl.querySelector(".play").setAttribute("aria-label",
-          (prossima ? "Ascolta l'anteprima di " : "Ascolta un estratto di ") + ev.titolo);
+          (prossima ? UI.anteprimaDi : UI.estrattoDi) + ev.titolo);
         collegaPlayer(pl, audioEv);
       }
 
       const link = q(".ev-link");
       if (ev.link) {
         link.href = ev.link;
-        link.textContent = prossima ? (ev.linkTesto || "Pre-save") : "Ascolta il brano completo";
+        link.textContent = prossima ? (t(ev.linkTesto) || "Pre-save") : UI.completo;
       } else {
         link.remove();
       }
     }
+
+    // ---------- About ----------
+    for (const par of [].concat(t(a.bio) || [])) {
+      const p = document.createElement("p");
+      p.textContent = par;
+      $("bio").appendChild(p);
+    }
+    if (a.generi && a.generi.length) $("generi").textContent = [].concat(t(a.generi)).join("  |  ");
+    else $("generiBox").remove();
 
     // ---------- Discografia (con estratti) ----------
     if (!uscite.length) $("discoBox").remove();
@@ -264,10 +360,10 @@
       el.querySelector("img").src = u.copertina || "";
       el.querySelector("img").alt = u.titolo;
       el.querySelector("strong").textContent = u.titolo;
-      el.querySelector(".nota").textContent = [u.tipo, u.anno].filter(Boolean).join(" · ");
+      el.querySelector(".nota").textContent = [t(u.tipo), u.anno].filter(Boolean).join(" · ");
 
       if (u.estratto) {
-        el.querySelector(".play").setAttribute("aria-label", "Ascolta un estratto di " + u.titolo);
+        el.querySelector(".play").setAttribute("aria-label", UI.estrattoDi + u.titolo);
         collegaPlayer(el.querySelector(".disco-cover"), u.estratto);
       } else {
         el.querySelector(".play").remove();
@@ -278,10 +374,37 @@
         const l = document.createElement("a");
         l.href = u.link; l.target = "_blank"; l.rel = "noopener";
         l.className = "disco-link";
-        l.textContent = "Ascolta completo ↗";
+        l.textContent = UI.completoBreve + " ↗";
         el.appendChild(l);
       }
       $("discoList").appendChild(el);
+    }
+
+    // ---------- Live ----------
+    const live = a.live || {};
+    if (!live.testo && !(live.schede || []).length) {
+      $("liveBox").remove();
+    } else {
+      $("liveTesto").textContent = t(live.testo);
+      for (const s of live.schede || []) {
+        const el = document.createElement("div");
+        el.className = "scheda";
+        el.innerHTML = `<h3></h3><p></p>`;
+        el.children[0].textContent = t(s.titolo);
+        el.children[1].textContent = t(s.testo);
+        $("liveSchede").appendChild(el);
+      }
+      if ((live.info || []).length) {
+        for (const i of live.info) {
+          const d = document.createElement("div");
+          d.innerHTML = `<dt></dt><dd></dd>`;
+          d.children[0].textContent = t(i.etichetta);
+          d.children[1].textContent = t(i.valore);
+          $("liveInfo").appendChild(d);
+        }
+      } else {
+        $("liveInfoBox").remove();
+      }
     }
 
     // ---------- Link ----------
@@ -295,19 +418,28 @@
         el.target = "_blank";
         el.rel = "noopener";
         el.innerHTML = `<span></span><span aria-hidden="true">↗</span>`;
-        el.firstChild.textContent = v.nome;
+        el.firstChild.textContent = t(v.nome);
         $(listaId).appendChild(el);
       }
     }
     riempi("storeList", "storeBox", a.store);
     riempi("socialList", "socialBox", a.social);
 
-    if (a.contatti) {
-      const m = document.createElement("a");
-      m.href = "mailto:" + a.contatti;
-      m.textContent = "Booking: " + a.contatti;
-      $("contatti").appendChild(m);
+    // ---------- Booking ----------
+    const booking = [];
+    if (a.contatti) booking.push({ href: "mailto:" + a.contatti, testo: a.contatti, icona: "✉" });
+    if (a.telefono) booking.push({ href: "tel:" + a.telefono.replace(/[^\d+]/g, ""), testo: a.telefono, icona: "☎" });
+    if (!booking.length) $("bookingBox").remove();
+    for (const b of booking) {
+      const el = document.createElement("a");
+      el.className = "link-voce";
+      el.href = b.href;
+      el.innerHTML = `<span></span><span aria-hidden="true"></span>`;
+      el.children[0].textContent = b.testo;
+      el.children[1].textContent = b.icona;
+      $("bookingList").appendChild(el);
     }
+
     $("copy").textContent = `© ${new Date().getFullYear()} ${a.nome || ""}`;
   </script>
 </body>
