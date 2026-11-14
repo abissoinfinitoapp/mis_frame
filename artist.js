@@ -93,7 +93,7 @@ window.ARTISTA = {
       titolo: "A World Without Rules",
       tipo: { it: "Singolo", en: "Single" },
       anno: "2026",
-      copertina: "img/cover-a-world-without-rules.jpg",
+      copertina: "img/cover-a-world-without-rules.jpg?v=2",
       estratto: "estratti/a-world-without-rules.mp3",
       link: "https://open.spotify.com/album/16sY4rROTUTHP8RZgUfppN"
     }
