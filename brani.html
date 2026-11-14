@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a090b" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Brani</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=6" />
+</head>
+<body class="brani">
+
+  <!-- ELENCO -->
+  <section id="vistaElenco">
+    <header class="barra">
+      <a href="index.html" class="indietro" aria-label="Torna alla home">←</a>
+      <div>
+        <p id="artistaNome" class="eyebrow"></p>
+        <h1>Brani</h1>
+      </div>
+    </header>
+    <div class="contenuto">
+      <input id="cerca" class="cerca" type="search" placeholder="Cerca brano…" />
+      <ol id="elenco" class="elenco"></ol>
+      <p id="vuoto" class="vuoto hidden">Nessun brano ancora caricato.</p>
+    </div>
+  </section>
+
+  <!-- BRANO -->
+  <section id="vistaBrano" class="hidden">
+    <header class="barra barra-brano">
+      <a href="#" class="indietro" aria-label="Torna all'elenco">←</a>
+      <div class="barra-titolo">
+        <p id="branoNumero" class="eyebrow"></p>
+        <h1 id="branoTitolo"></h1>
+      </div>
+    </header>
+
+    <div class="player">
+      <div class="scelta" role="tablist" aria-label="Traccia">
+        <button id="btnGuida" role="tab" data-traccia="guida">Traccia guida</button>
+        <button id="btnBase" role="tab" data-traccia="base">Base</button>
+      </div>
+      <audio id="audio" controls preload="metadata"></audio>
+      <p id="audioInfo" class="nota"></p>
+    </div>
+
+    <div class="strumenti">
+      <button id="testoMeno" aria-label="Testo più piccolo">A−</button>
+      <button id="testoPiu" aria-label="Testo più grande">A+</button>
+      <span class="spazio"></span>
+      <button id="prec" aria-label="Brano precedente">‹ Prec</button>
+      <button id="succ" aria-label="Brano successivo">Succ ›</button>
+    </div>
+
+    <article id="testo" class="testo"></article>
+  </section>
+
+  <script src="artist.js?v=8"></script>
+  <script src="songs.js?v=4"></script>
+  <script>
+    const BRANI = window.BRANI || [];
+    const $ = (id) => document.getElementById(id);
+    const audio = $("audio");
+
+    let corrente = null;
+    let traccia = leggi("brani_traccia") || "guida";
+    let dimensione = Number(leggi("brani_testo_px")) || 20;
+    let caricamento = 0;
+    let wakeLock = null;
+
+    function leggi(k) { try { return localStorage.getItem(k); } catch { return null; } }
+    function scrivi(k, v) { try { localStorage.setItem(k, v); } catch {} }
+    const num = (i) => String(i + 1).padStart(2, "0");
+
+    $("artistaNome").textContent = (window.ARTISTA && window.ARTISTA.nome) || "";
+
+    // ---------- Elenco ----------
+    function disegnaElenco() {
+      const q = $("cerca").value.trim().toLowerCase();
+      const ol = $("elenco");
+      ol.innerHTML = "";
+      BRANI.forEach((b, i) => {
+        if (q && !b.titolo.toLowerCase().includes(q)) return;
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = "#" + encodeURIComponent(b.id);
+        a.innerHTML = `<span class="n"></span><span class="t"></span><span aria-hidden="true">›</span>`;
+        a.querySelector(".n").textContent = num(i);
+        a.querySelector(".t").textContent = b.titolo;
+        li.appendChild(a);
+        ol.appendChild(li);
+      });
+      $("vuoto").classList.toggle("hidden", BRANI.length > 0);
+    }
+    $("cerca").addEventListener("input", disegnaElenco);
+
+    // ---------- Brano ----------
+    function apriBrano(b) {
+      corrente = b;
+      const i = BRANI.indexOf(b);
+      document.title = b.titolo;
+      $("branoNumero").textContent = `Brano ${num(i)} di ${BRANI.length}`;
+      $("branoTitolo").textContent = b.titolo;
+      $("prec").disabled = i <= 0;
+      $("succ").disabled = i >= BRANI.length - 1;
+
+      audio.pause();
+      impostaTraccia(traccia, false);
+      caricaTesto(b);
+      window.scrollTo(0, 0);
+    }
+
+    function impostaTraccia(t, mantieniPosizione = true) {
+      if (!corrente) return;
+      // se una delle due manca, usa quella disponibile
+      if (!corrente[t]) t = corrente.guida ? "guida" : "base";
+      traccia = t;
+      scrivi("brani_traccia", t);
+
+      $("btnGuida").setAttribute("aria-selected", t === "guida");
+      $("btnBase").setAttribute("aria-selected", t === "base");
+      $("btnGuida").disabled = !corrente.guida;
+      $("btnBase").disabled = !corrente.base;
+
+      const src = corrente[t];
+      if (!src) {
+        audio.removeAttribute("src");
+        audio.load();
+        $("audioInfo").textContent = "Audio non ancora disponibile.";
+        return;
+      }
+
+      const pos = mantieniPosizione ? audio.currentTime : 0;
+      const suonava = mantieniPosizione && !audio.paused;
+      $("audioInfo").textContent = "";
+      audio.src = encodeURI(src);
+      audio.addEventListener("loadedmetadata", function riprendi() {
+        audio.removeEventListener("loadedmetadata", riprendi);
+        if (pos) audio.currentTime = Math.min(pos, audio.duration || pos);
+        if (suonava) audio.play().catch(() => {});
+      });
+      audio.load();
+    }
+
+    audio.addEventListener("error", () => {
+      if (audio.getAttribute("src")) $("audioInfo").textContent = "File audio non trovato.";
+    });
+
+    $("btnGuida").addEventListener("click", () => impostaTraccia("guida"));
+    $("btnBase").addEventListener("click", () => impostaTraccia("base"));
+
+    async function caricaTesto(b) {
+      const id = ++caricamento;
+      const box = $("testo");
+      box.innerHTML = '<p class="nota">Caricamento testo…</p>';
+      let txt = "";
+      if (b.testo) {
+        try {
+          const r = await fetch(encodeURI(b.testo),{ cache: "no-cache" });
+          if (r.ok) txt = await r.text();
+        } catch {}
+      }
+      if (id !== caricamento) return;
+      box.innerHTML = "";
+      if (!txt.trim()) {
+        box.innerHTML = '<p class="nota">Testo non ancora disponibile.</p>';
+        return;
+      }
+      const strofe = txt.replace(/\r/g, "").trim().split(/\n\s*\n/);
+      for (const s of strofe) {
+        const div = document.createElement("div");
+        div.className = "strofa";
+        for (const riga of s.split("\n")) {
+          const r = riga.trim();
+          const m = r.match(/^\[(.+)\]$/);
+          const p = document.createElement("p");
+          if (m) { p.className = "etichetta"; p.textContent = m[1]; }
+          else p.textContent = r;
+          div.appendChild(p);
+        }
+        box.appendChild(div);
+      }
+    }
+
+    // ---------- Dimensione testo ----------
+    function applicaDimensione() {
+      document.documentElement.style.setProperty("--testo-px", dimensione + "px");
+      scrivi("brani_testo_px", dimensione);
+    }
+    $("testoMeno").addEventListener("click", () => { dimensione = Math.max(14, dimensione - 2); applicaDimensione(); });
+    $("testoPiu").addEventListener("click", () => { dimensione = Math.min(40, dimensione + 2); applicaDimensione(); });
+    applicaDimensione();
+
+    // ---------- Navigazione ----------
+    function vai(delta) {
+      const i = BRANI.indexOf(corrente) + delta;
+      if (BRANI[i]) location.hash = encodeURIComponent(BRANI[i].id);
+    }
+    $("prec").addEventListener("click", () => vai(-1));
+    $("succ").addEventListener("click", () => vai(1));
+
+    function instrada() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const b = BRANI.find((x) => x.id === id);
+      $("vistaElenco").classList.toggle("hidden", !!b);
+      $("vistaBrano").classList.toggle("hidden", !b);
+      if (b) {
+        if (b !== corrente) apriBrano(b);
+      } else {
+        audio.pause();
+        corrente = null;
+        document.title = "Brani";
+        disegnaElenco();
+      }
+    }
+    window.addEventListener("hashchange", instrada);
+
+    // ---------- Schermo sempre acceso durante la riproduzione ----------
+    async function tieniAcceso() {
+      try { if ("wakeLock" in navigator && !wakeLock) wakeLock = await navigator.wakeLock.request("screen"); } catch {}
+    }
+    function rilascia() { try { wakeLock && wakeLock.release(); } catch {} wakeLock = null; }
+    audio.addEventListener("play", tieniAcceso);
+    audio.addEventListener("pause", rilascia);
+    audio.addEventListener("ended", rilascia);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && !audio.paused) { wakeLock = null; tieniAcceso(); }
+    });
+
+    instrada();
+  </script>
+</body>
+</html>

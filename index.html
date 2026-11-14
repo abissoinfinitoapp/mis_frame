@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a090b" />
+  <title>Artista</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=6" />
+</head>
+<body class="home">
+
+  <header class="hero">
+    <img id="heroFoto" class="hero-foto" alt="" />
+    <div class="hero-testo">
+      <p id="sottotitolo" class="eyebrow"></p>
+      <h1 id="nome"></h1>
+      <a id="heroBtn" class="btn btn-primario" href="#evidenza">Ascolta</a>
+    </div>
+  </header>
+
+  <main class="contenuto">
+
+    <section id="ultimaBox" class="blocco in-evidenza hidden"></section>
+    <section id="prossimaBox" class="blocco in-evidenza hidden"></section>
+
+    <template id="tplEvidenza">
+      <p class="eyebrow ev-etichetta"></p>
+      <div class="evidenza-media"></div>
+      <h2 class="ev-titolo"></h2>
+      <p class="nota ev-info"></p>
+      <div class="player-estratto hidden">
+        <button class="play"></button>
+        <div class="barra-avanz"><span></span></div>
+        <span class="durata"></span>
+      </div>
+      <a class="btn btn-primario ev-link" target="_blank" rel="noopener"></a>
+    </template>
+
+    <section class="blocco">
+      <p id="bio" class="bio"></p>
+    </section>
+
+    <section id="discoBox" class="blocco">
+      <h2 class="sezione">Discografia</h2>
+      <div id="discoList" class="disco"></div>
+    </section>
+
+    <section id="storeBox" class="blocco">
+      <h2 class="sezione">Ascolta su</h2>
+      <div id="storeList" class="link-lista"></div>
+    </section>
+
+    <section id="socialBox" class="blocco">
+      <h2 class="sezione">Segui</h2>
+      <div id="socialList" class="link-lista compatta"></div>
+    </section>
+
+    <footer class="piede">
+      <p id="contatti"></p>
+      <p id="copy"></p>
+    </footer>
+
+  </main>
+
+  <script src="artist.js?v=8"></script>
+  <script>
+    const a = window.ARTISTA || {};
+    const $ = (id) => document.getElementById(id);
+
+    document.title = a.nome || "Artista";
+    $("nome").textContent = a.nome || "";
+    $("sottotitolo").textContent = a.sottotitolo || "";
+    $("bio").textContent = a.bio || "";
+
+    const foto = $("heroFoto");
+    if (a.foto) {
+      foto.src = a.foto;
+      foto.alt = a.nome || "";
+      foto.onerror = () => foto.remove();
+    } else {
+      foto.remove();
+    }
+
+    if (a.sfondoPagina) {
+      document.body.style.setProperty("--sfondo-pagina", `url("${a.sfondoPagina}")`);
+    }
+
+    // ---------- Lettore estratti: un solo brano alla volta ----------
+    const lettore = new Audio();
+    lettore.preload = "none";
+    let attivo = null; // { btn, barra, durata }
+
+    function fmt(s) {
+      if (!isFinite(s)) return "";
+      s = Math.round(s);
+      return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    }
+
+    function collegaPlayer(box, src) {
+      const ui = {
+        box,
+        btn: box.querySelector(".play"),
+        barra: box.querySelector(".barra-avanz span"),
+        durata: box.querySelector(".durata")
+      };
+      ui.btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (attivo === ui && !lettore.paused) { lettore.pause(); return; }
+        if (attivo !== ui) {
+          if (attivo) reimposta(attivo);
+          attivo = ui;
+          lettore.src = encodeURI(src);
+        }
+        lettore.play().catch(() => {});
+      });
+      return ui;
+    }
+
+    function reimposta(ui) {
+      ui.box.classList.remove("in-play");
+      ui.barra.style.width = "0";
+    }
+
+    lettore.addEventListener("play", () => attivo && attivo.box.classList.add("in-play"));
+    lettore.addEventListener("pause", () => attivo && attivo.box.classList.remove("in-play"));
+    lettore.addEventListener("ended", () => { if (attivo) reimposta(attivo); });
+    lettore.addEventListener("timeupdate", () => {
+      if (!attivo || !lettore.duration) return;
+      attivo.barra.style.width = (lettore.currentTime / lettore.duration * 100) + "%";
+      if (attivo.durata) attivo.durata.textContent = fmt(lettore.duration - lettore.currentTime);
+    });
+
+    // ---------- In evidenza: prossima uscita, altrimenti l'ultima ----------
+    const uscite = (a.uscite || []).filter((u) => u.titolo);
+    const prossima = a.prossima && a.prossima.titolo ? a.prossima : null;
+    // Sotto l'header: ultima uscita (con il video), poi la prossima con l'anteprima
+    if (uscite[0]) mostraEvidenza($("ultimaBox"), uscite[0], false);
+    if (prossima) mostraEvidenza($("prossimaBox"), prossima, true);
+
+    const primo = prossima && prossima.anteprima ? "prossimaBox" : (uscite[0] ? "ultimaBox" : null);
+    if (primo) {
+      $("heroBtn").href = "#" + primo;
+      $("heroBtn").textContent = primo === "prossimaBox" ? "Ascolta l'anteprima" : "Ascolta";
+    } else {
+      $("heroBtn").remove();
+    }
+
+    function mostraEvidenza(box, ev, prossima) {
+      box.appendChild($("tplEvidenza").content.cloneNode(true));
+      const q = (s) => box.querySelector(s);
+      box.classList.remove("hidden");
+      q(".ev-etichetta").textContent = prossima ? "Prossima uscita" : "Ultima uscita";
+      q(".ev-titolo").textContent = ev.titolo;
+      q(".ev-info").textContent = prossima
+        ? [ev.tipo, ev.data ? "in uscita il " + ev.data : "in arrivo"].filter(Boolean).join(" · ")
+        : [ev.tipo, ev.data || ev.anno].filter(Boolean).join(" · ");
+
+      const media = q(".evidenza-media");
+      const img = document.createElement("img");
+      img.src = ev.copertina || "";
+      img.alt = ev.titolo;
+      if (ev.video) {
+        const v = document.createElement("video");
+        v.src = ev.video;
+        v.poster = ev.copertina || "";
+        v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+        v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
+        v.setAttribute("aria-label", ev.titolo);
+        v.onerror = () => v.replaceWith(img);
+        media.appendChild(v);
+      } else {
+        media.appendChild(img);
+      }
+
+      const audioEv = prossima ? ev.anteprima : ev.estratto;
+      if (audioEv) {
+        const pl = q(".player-estratto");
+        pl.classList.remove("hidden");
+        pl.querySelector(".play").setAttribute("aria-label",
+          (prossima ? "Ascolta l'anteprima di " : "Ascolta un estratto di ") + ev.titolo);
+        collegaPlayer(pl, audioEv);
+      }
+
+      const link = q(".ev-link");
+      if (ev.link) {
+        link.href = ev.link;
+        link.textContent = prossima ? (ev.linkTesto || "Pre-save") : "Ascolta il brano completo";
+      } else {
+        link.remove();
+      }
+    }
+
+    // ---------- Discografia (con estratti) ----------
+    if (!uscite.length) $("discoBox").remove();
+    for (const u of uscite) {
+      const el = document.createElement("div");
+      el.className = "disco-voce";
+      el.innerHTML = `
+        <div class="disco-cover">
+          <img loading="lazy" alt="" />
+          <button class="play" aria-label=""></button>
+          <div class="barra-avanz"><span></span></div>
+        </div>
+        <strong></strong><span class="nota"></span>`;
+      el.querySelector("img").src = u.copertina || "";
+      el.querySelector("img").alt = u.titolo;
+      el.querySelector("strong").textContent = u.titolo;
+      el.querySelector(".nota").textContent = [u.tipo, u.anno].filter(Boolean).join(" · ");
+
+      if (u.estratto) {
+        el.querySelector(".play").setAttribute("aria-label", "Ascolta un estratto di " + u.titolo);
+        collegaPlayer(el.querySelector(".disco-cover"), u.estratto);
+      } else {
+        el.querySelector(".play").remove();
+        el.querySelector(".barra-avanz").remove();
+      }
+
+      if (u.link) {
+        const l = document.createElement("a");
+        l.href = u.link; l.target = "_blank"; l.rel = "noopener";
+        l.className = "disco-link";
+        l.textContent = "Ascolta completo ↗";
+        el.appendChild(l);
+      }
+      $("discoList").appendChild(el);
+    }
+
+    // ---------- Link ----------
+    function riempi(listaId, boxId, voci) {
+      const attive = (voci || []).filter((v) => v.url);
+      if (!attive.length) { $(boxId).remove(); return; }
+      for (const v of attive) {
+        const el = document.createElement("a");
+        el.className = "link-voce";
+        el.href = v.url;
+        el.target = "_blank";
+        el.rel = "noopener";
+        el.innerHTML = `<span></span><span aria-hidden="true">↗</span>`;
+        el.firstChild.textContent = v.nome;
+        $(listaId).appendChild(el);
+      }
+    }
+    riempi("storeList", "storeBox", a.store);
+    riempi("socialList", "socialBox", a.social);
+
+    if (a.contatti) {
+      const m = document.createElement("a");
+      m.href = "mailto:" + a.contatti;
+      m.textContent = "Booking: " + a.contatti;
+      $("contatti").appendChild(m);
+    }
+    $("copy").textContent = `© ${new Date().getFullYear()} ${a.nome || ""}`;
+  </script>
+</body>
+</html>
